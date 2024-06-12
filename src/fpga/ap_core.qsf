@@ -42,7 +42,7 @@
 # ========================
 set_global_assignment -name ORIGINAL_QUARTUS_VERSION 18.1.1
 set_global_assignment -name PROJECT_CREATION_TIME_DATE "21:31:36  JANUARY 22, 2020"
-set_global_assignment -name LAST_QUARTUS_VERSION "23.1std.0 Lite Edition"
+set_global_assignment -name LAST_QUARTUS_VERSION "18.1.0 Standard Edition"
 set_global_assignment -name PROJECT_OUTPUT_DIRECTORY output_files
 set_global_assignment -name PRE_FLOW_SCRIPT_FILE "quartus_sh:apf/build_id_gen.tcl"
 set_global_assignment -name SMART_RECOMPILE ON
@@ -738,6 +738,7 @@ set_global_assignment -name NUM_PARALLEL_PROCESSORS ALL
 set_global_assignment -name PARTITION_NETLIST_TYPE SOURCE -section_id Top
 set_global_assignment -name PARTITION_FITTER_PRESERVATION_LEVEL PLACEMENT_AND_ROUTING -section_id Top
 set_global_assignment -name PARTITION_COLOR 16764057 -section_id Top
+set_global_assignment -name QIP_FILE analogizer/analogizer.qip
 set_global_assignment -name VHDL_FILE ../../external/gauntlet/rtl/lib/TG68K/TG68KdotC_Kernel.vhd
 set_global_assignment -name VHDL_FILE ../../external/gauntlet/rtl/lib/TG68K/TG68K_Pack.vhd
 set_global_assignment -name VHDL_FILE ../../external/gauntlet/rtl/lib/TG68K/TG68K_ALU.vhd
@@ -813,7 +814,10 @@ set_global_assignment -name QIP_FILE apf/mf_ddio_bidir_12.qip
 set_global_assignment -name VERILOG_FILE core/core_bridge_cmd.v
 set_global_assignment -name SDC_FILE core/core_constraints.sdc
 set_global_assignment -name SIGNALTAP_FILE core/stp1.stp
-set_global_assignment -name QIP_FILE core/mf_pllbase.qip
 set_global_assignment -name SIP_FILE core/mf_pllbase.sip
-set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
+set_global_assignment -name QIP_FILE pll/mf_pllbase.qip
+set_global_assignment -name SIP_FILE pll/mf_pllbase.sip
+set_global_assignment -name QIP_FILE pll2/pll_video.qip
+set_global_assignment -name SIP_FILE pll2/pll_video.sip
 set_global_assignment -name SLD_FILE db/stp1_auto_stripped.stp
+set_instance_assignment -name PARTITION_HIERARCHY root_partition -to | -section_id Top
