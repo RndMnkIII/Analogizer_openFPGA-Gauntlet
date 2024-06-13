@@ -174,6 +174,17 @@
 				]
 			},
 			{
+				"name": "Scandoubler HQ2x",
+				"id": 46,
+				"type": "check",
+				"enabled": true,
+				"address": "0xF6000000",
+				"persist": true,
+				"writeonly": true,
+				"defaultval": 0,
+				"value": 1
+			},
+			{
 				"name": "P1 Character",
 				"id": 2,
 				"type": "list",

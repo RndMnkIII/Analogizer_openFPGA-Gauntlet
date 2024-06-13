@@ -310,9 +310,8 @@ module openFPGA_Pocket_Analogizer_SNAC #(parameter MASTER_CLK_FREQ=50_000_000)
 
     assign o_stb = stb_clk;
 
-
     //PSX game controller for 2 players
-    
+
     //DB15/NES/SNES game controller
     wire [15:0] sl_p1 /* synthesis keep */;
     wire [15:0] sl_p2 /* synthesis keep */;

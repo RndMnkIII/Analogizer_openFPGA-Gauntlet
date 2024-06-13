@@ -299,7 +299,7 @@ assign cram1_lb_n = 1;
 //assign sram_oe_n  = 1;
 //assign sram_we_n  = 1;
 //assign sram_ub_n  = 1;
-//assign sram_lb_n  = 1;
+//assign sram_lb_n  = 1;sd_hq2x
 
 assign dbg_tx = 1'bZ;
 assign user1 = 1'bZ;
@@ -318,6 +318,9 @@ always @(*) begin
         // example
         // bridge_rd_data <= example_device_data;
         bridge_rd_data <= 0;
+    end
+    32'hF6000000: begin //Analogizer
+        bridge_rd_data <= {31'h0,sd_hq2x};
     end
     32'hF7000000: begin //Analogizer
         bridge_rd_data <= {18'h0,analogizer_settings};
@@ -474,6 +477,9 @@ always @(posedge clk_74a) begin
        32'hB0000000: begin
             do_reset <= ~do_reset;
        end
+       32'hF6000000: begin //ANALOGIZER
+            sd_hq2x  <=  bridge_wr_data[0];
+       end
        32'hF7000000: begin //ANALOGIZER
             analogizer_settings  <=  bridge_wr_data[13:0];
        end
@@ -486,8 +492,11 @@ end
 //Pocket Menu settings
 reg [13:0] analogizer_settings = 0;
 wire [13:0] analogizer_settings_s;
+reg  sd_hq2x = 0;
+wire sd_hq2x_s;
 
 synch_3 #(.WIDTH(14)) sync_analogizer(analogizer_settings, analogizer_settings_s, clk_sys);
+synch_3 #(.WIDTH(1)) sync_sd_hq2x(sd_hq2x, sd_hq2x_s, clk_sys);
 
 always @(*) begin
 snac_game_cont_type   = analogizer_settings_s[4:0];
@@ -611,13 +620,19 @@ wire PALFLAG;
 	// parameter CLK_VIDEO_PAL =  28.63636; // Must be filled E.g XX.X Hz - CLK_VIDEO
 
     // adjusted for 57_272_720 video clock
-	localparam [39:0] NTSC_PHASE_INC = 40'd68719476736; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
-	localparam [39:0] PAL_PHASE_INC  = 40'd85115834707; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
+	// localparam [39:0] NTSC_PHASE_INC = 40'd68719476736; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
+	// localparam [39:0] PAL_PHASE_INC  = 40'd85115834707; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
 
     //adjusted for 28.63636MHz video clock
     // localparam [39:0] NTSC_PHASE_INC = 40'd137438953472; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
 	// localparam [39:0] PAL_PHASE_INC  = 40'd170231669414; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
 
+   // adjusted for 93_068_170 video clock
+	localparam [39:0] NTSC_PHASE_INC = 40'd42288908760; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
+	localparam [39:0] PAL_PHASE_INC  = 40'd52378975204; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
+
+    //42.288.908.760
+    //52.378.975.204
 	// Send Parameters to Y/C Module
 	assign CHROMA_PHASE_INC = (analogizer_video_type == 4'h4) || (analogizer_video_type == 4'hC) ? PAL_PHASE_INC : NTSC_PHASE_INC; 
 	assign PALFLAG = (analogizer_video_type == 4'h4) || (analogizer_video_type == 4'hC); 
@@ -625,18 +640,21 @@ wire PALFLAG;
     assign CHROMA_MULT = 5'd0; //yc_chroma_mult_s;
  	assign COLORBURST_RANGE = {COLORBURST_START, COLORBURST_NTSC_END, COLORBURST_PAL_END}; // Pass colorburst length
 
-//28_636_360
-//57_272_720
 
 
-synch_3 #(.WIDTH(30)) sync_video({{2{r_conv}},{2{g_conv}},{2{b_conv}},~hs_core,~vs_core,SYNC,~hblank_core,~vblank_core,ANALOGIZER_DE}, {color_s,sync_s,blank_s}, clk_core_57);
+
+synch_3 #(.WIDTH(30)) sync_video({ {r_conv,4'h0},{g_conv,4'h0},{b_conv,4'h0},~hs_core,~vs_core,SYNC,~hblank_core,~vblank_core,ANALOGIZER_DE}, {color_s,sync_s,blank_s}, clk_sys);
 wire [23:0] color_s; //RGB24
 wire [2:0] sync_s;  //h_sync, v_sync, CSYNC
 wire [2:0] blank_s; //h_blank, v_blank, BLANKn
+wire clk7vid_s;
+synch_3 #(.WIDTH(1)) sync_clk7vid({clk_core_7}, {clk7vid_s}, clk_sys);
 
-
-openFPGA_Pocket_Analogizer #(.MASTER_CLK_FREQ(57_272_720)) analogizer (
-	.i_clk(clk_core_57),
+//28_636_360
+//57_272_720
+//93_068_170
+openFPGA_Pocket_Analogizer #(.MASTER_CLK_FREQ(93_068_170), .LINE_LENGTH(320)) analogizer (
+	.i_clk(clk_sys),
 	.i_rst((~reset_n || manual_reset)), //i_rst is active high
 	.i_ena(1'b1),
 	//Video interface
@@ -650,7 +668,16 @@ openFPGA_Pocket_Analogizer #(.MASTER_CLK_FREQ(57_272_720)) analogizer (
     .Hsync(sync_s[2]),
 	.Vsync(sync_s[1]),
     .Csync(sync_s[0]), //composite SYNC on HSync.
-    .video_clk(clk_core_57),
+    // .R({r_conv,4'h0}),
+	// .G({g_conv,4'h0}),
+	// .B({b_conv,4'h0}),
+    // .Hblank(~hblank_core),
+    // .Vblank(~vblank_core),
+    // .BLANKn(ANALOGIZER_DE),
+    // .Hsync(~hs_core),
+	// .Vsync(~vs_core),
+    // .Csync(SYNC), //composite SYNC on HSync.
+    .video_clk(clk_sys),
     //Video Y/C Encoder interface
     .PALFLAG(PALFLAG),
     .MULFLAG(1'b0),
@@ -659,7 +686,8 @@ openFPGA_Pocket_Analogizer #(.MASTER_CLK_FREQ(57_272_720)) analogizer (
     .CHROMA_PHASE_INC(CHROMA_PHASE_INC),
     .COLORBURST_RANGE(COLORBURST_RANGE),
     //Video SVGA Scandoubler interface
-    .ce_divider(3'd6),
+    .ce_pix(clk7vid_s),
+    .hq2x(sd_hq2x_s),
 	//SNAC interface
 	.conf_AB((snac_game_cont_type >= 5'd16)),              //0 conf. A(default), 1 conf. B (see graph above)
 	.game_cont_type(snac_game_cont_type), //0-15 Conf. A, 16-31 Conf. B
@@ -1437,24 +1465,24 @@ assign clk_sys = clk_93;
 
 //[ANALOGIZER HOOK START]
 wire clk_core_57;
-pll_video mp2 (
-    .refclk         ( clk_74a          ),
-    .rst            ( 0                ),
-	.outclk_0       ( clk_core_57      ),
-
-    .locked         ( pll_video_locked  )
-);
+wire clk_core_28;
 
 mf_pllbase mp1 (
     .refclk         ( clk_74a          ),
     .rst            ( 0                ),
-	.outclk_3		( clk_93           ),
-    .outclk_4	    ( dram_clk         ), // 180 degrees
-    .outclk_1       ( clk_core_7_90deg ),
-	.outclk_0       ( clk_core_7       ),
-    .outclk_2       ( clk_14           ),
-
-    .locked         ( pll_core_locked  )
+	.outclk_0       ( clk_core_7      ),
+	.outclk_1       ( clk_core_7_90deg      ),
+    .outclk_2       ( clk_14       ),
+	.outclk_3       ( clk_93),
+    .outclk_4       ( dram_clk          ),
+    .locked         ( pll_core_locked )
 );
+pll_video mp2 (
+    .refclk         ( clk_74a          ),
+    .rst            ( 0                ),
+	.outclk_0       ( clk_core_57     ),
+    .locked         ( pll_video_locked )
+);
+
 //[ANALOGIZER HOOK END]
 endmodule

@@ -75,57 +75,57 @@ endmodule
 // Retrieval info: 	<generic name="gui_actual_phase_shift0" value="0" />
 // Retrieval info: 	<generic name="gui_duty_cycle0" value="50" />
 // Retrieval info: 	<generic name="gui_cascade_counter1" value="false" />
-// Retrieval info: 	<generic name="gui_output_clock_frequency1" value="100.0" />
+// Retrieval info: 	<generic name="gui_output_clock_frequency1" value="14.31818" />
 // Retrieval info: 	<generic name="gui_divide_factor_c1" value="1" />
 // Retrieval info: 	<generic name="gui_actual_output_clock_frequency1" value="0 MHz" />
-// Retrieval info: 	<generic name="gui_ps_units1" value="ps" />
+// Retrieval info: 	<generic name="gui_ps_units1" value="degrees" />
 // Retrieval info: 	<generic name="gui_phase_shift1" value="0" />
-// Retrieval info: 	<generic name="gui_phase_shift_deg1" value="0.0" />
+// Retrieval info: 	<generic name="gui_phase_shift_deg1" value="180.0" />
 // Retrieval info: 	<generic name="gui_actual_phase_shift1" value="0" />
 // Retrieval info: 	<generic name="gui_duty_cycle1" value="50" />
 // Retrieval info: 	<generic name="gui_cascade_counter2" value="false" />
-// Retrieval info: 	<generic name="gui_output_clock_frequency2" value="100.0" />
+// Retrieval info: 	<generic name="gui_output_clock_frequency2" value="0.0" />
 // Retrieval info: 	<generic name="gui_divide_factor_c2" value="1" />
 // Retrieval info: 	<generic name="gui_actual_output_clock_frequency2" value="0 MHz" />
-// Retrieval info: 	<generic name="gui_ps_units2" value="ps" />
+// Retrieval info: 	<generic name="gui_ps_units2" value="degrees" />
 // Retrieval info: 	<generic name="gui_phase_shift2" value="0" />
-// Retrieval info: 	<generic name="gui_phase_shift_deg2" value="0.0" />
+// Retrieval info: 	<generic name="gui_phase_shift_deg2" value="180.0" />
 // Retrieval info: 	<generic name="gui_actual_phase_shift2" value="0" />
 // Retrieval info: 	<generic name="gui_duty_cycle2" value="50" />
 // Retrieval info: 	<generic name="gui_cascade_counter3" value="false" />
-// Retrieval info: 	<generic name="gui_output_clock_frequency3" value="100.0" />
+// Retrieval info: 	<generic name="gui_output_clock_frequency3" value="93.006817" />
 // Retrieval info: 	<generic name="gui_divide_factor_c3" value="1" />
 // Retrieval info: 	<generic name="gui_actual_output_clock_frequency3" value="0 MHz" />
-// Retrieval info: 	<generic name="gui_ps_units3" value="ps" />
+// Retrieval info: 	<generic name="gui_ps_units3" value="degrees" />
 // Retrieval info: 	<generic name="gui_phase_shift3" value="0" />
-// Retrieval info: 	<generic name="gui_phase_shift_deg3" value="0.0" />
+// Retrieval info: 	<generic name="gui_phase_shift_deg3" value="180.0" />
 // Retrieval info: 	<generic name="gui_actual_phase_shift3" value="0" />
 // Retrieval info: 	<generic name="gui_duty_cycle3" value="50" />
 // Retrieval info: 	<generic name="gui_cascade_counter4" value="false" />
-// Retrieval info: 	<generic name="gui_output_clock_frequency4" value="100.0" />
+// Retrieval info: 	<generic name="gui_output_clock_frequency4" value="93.006817" />
 // Retrieval info: 	<generic name="gui_divide_factor_c4" value="1" />
 // Retrieval info: 	<generic name="gui_actual_output_clock_frequency4" value="0 MHz" />
-// Retrieval info: 	<generic name="gui_ps_units4" value="ps" />
+// Retrieval info: 	<generic name="gui_ps_units4" value="degrees" />
 // Retrieval info: 	<generic name="gui_phase_shift4" value="0" />
-// Retrieval info: 	<generic name="gui_phase_shift_deg4" value="0.0" />
+// Retrieval info: 	<generic name="gui_phase_shift_deg4" value="270.0" />
 // Retrieval info: 	<generic name="gui_actual_phase_shift4" value="0" />
 // Retrieval info: 	<generic name="gui_duty_cycle4" value="50" />
 // Retrieval info: 	<generic name="gui_cascade_counter5" value="false" />
-// Retrieval info: 	<generic name="gui_output_clock_frequency5" value="100.0" />
+// Retrieval info: 	<generic name="gui_output_clock_frequency5" value="0.0" />
 // Retrieval info: 	<generic name="gui_divide_factor_c5" value="1" />
 // Retrieval info: 	<generic name="gui_actual_output_clock_frequency5" value="0 MHz" />
-// Retrieval info: 	<generic name="gui_ps_units5" value="ps" />
+// Retrieval info: 	<generic name="gui_ps_units5" value="degrees" />
 // Retrieval info: 	<generic name="gui_phase_shift5" value="0" />
-// Retrieval info: 	<generic name="gui_phase_shift_deg5" value="0.0" />
+// Retrieval info: 	<generic name="gui_phase_shift_deg5" value="90.0" />
 // Retrieval info: 	<generic name="gui_actual_phase_shift5" value="0" />
 // Retrieval info: 	<generic name="gui_duty_cycle5" value="50" />
 // Retrieval info: 	<generic name="gui_cascade_counter6" value="false" />
-// Retrieval info: 	<generic name="gui_output_clock_frequency6" value="100.0" />
+// Retrieval info: 	<generic name="gui_output_clock_frequency6" value="14.31818" />
 // Retrieval info: 	<generic name="gui_divide_factor_c6" value="1" />
 // Retrieval info: 	<generic name="gui_actual_output_clock_frequency6" value="0 MHz" />
-// Retrieval info: 	<generic name="gui_ps_units6" value="ps" />
+// Retrieval info: 	<generic name="gui_ps_units6" value="degrees" />
 // Retrieval info: 	<generic name="gui_phase_shift6" value="0" />
-// Retrieval info: 	<generic name="gui_phase_shift_deg6" value="0.0" />
+// Retrieval info: 	<generic name="gui_phase_shift_deg6" value="180.0" />
 // Retrieval info: 	<generic name="gui_actual_phase_shift6" value="0" />
 // Retrieval info: 	<generic name="gui_duty_cycle6" value="50" />
 // Retrieval info: 	<generic name="gui_cascade_counter7" value="false" />

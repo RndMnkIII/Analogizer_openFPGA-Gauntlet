@@ -69,7 +69,7 @@
 `default_nettype none
 `timescale 1ns / 1ps
 
-module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000) (
+module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000, parameter LINE_LENGTH) (
 	input wire i_clk,
     input wire i_rst,
 	input wire i_ena,
@@ -94,7 +94,8 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000) (
 	input wire [39:0] CHROMA_PHASE_INC,
 	input wire [26:0] COLORBURST_RANGE,
 	//Video SVGA Scandoubler interface
-	input wire [2:0] ce_divider,
+	input wire ce_pix,
+	input wire hq2x,
 	//SNAC interface
     input wire conf_AB,              //0 conf. A(default), 1 conf. B (see graph above)
     input wire [4:0] game_cont_type, //0-15 Conf. A, 16-31 Conf. B
@@ -162,7 +163,7 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000) (
 	reg [5:0] Rout, Gout, Bout;
 	reg HsyncOut, VsyncOut, BLANKnOut;
 	wire [7:0] Yout, PrOut, PbOut;
-	wire [5:0] R_Sd, G_Sd, B_Sd;
+	wire [7:0] R_Sd, G_Sd, B_Sd;
 	wire Hsync_Sd, Vsync_Sd;
 	wire Hblank_Sd, Vblank_Sd;
 	wire BLANKn_SD = ~(Hblank_Sd || Vblank_Sd);
@@ -211,9 +212,9 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000) (
 				BLANKnOut = 1'b1; //ADV7123 needs this
 			end
 			4'h5, 4'hD: begin //Scandoubler modes
-				Rout = R_Sd;
-				Gout = G_Sd;
-				Bout = B_Sd;
+				Rout = R_Sd[7:2];
+				Gout = G_Sd[7:2];
+				Bout = B_Sd[7:2];
 				HsyncOut = Hsync_Sd;
 				VsyncOut = Vsync_Sd;
 				BLANKnOut = 1'b1;
@@ -291,33 +292,57 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000) (
 	// 	endcase
 	// end
 
-	scandoubler sc_video
+//	scandoubler sc_video
+//	(
+//		// system interface
+//		.clk_sys(i_clk),
+//		.bypass(1'b0),
+//
+//		// Pixelclock
+//		.ce_divider(ce_divider), // 0 - clk_sys/4, 1 - clk_sys/2, 2 - clk_sys/3, 3 - clk_sys/4, etc.
+//		//.ce_divider(cediv), // 0 - clk_sys/4, 1 - clk_sys/2, 2 - clk_sys/3, 3 - clk_sys/4, etc.
+//		.pixel_ena(), //output
+//		.scanlines(2'd2), // scanlines (00-none 01-25% 10-50% 11-75%)
+//
+//		// shifter video interface
+//		.hb_in(Hblank),
+//		.vb_in(Vblank),
+//		.hs_in(Hsync),
+//		//.hs_in(delayed_hsync[1]),
+//		.vs_in(Vsync),
+//		.r_in({R[7:2]&{6{BLANKn}}}),
+//		.g_in({G[7:2]&{6{BLANKn}}}),
+//		.b_in({B[7:2]&{6{BLANKn}}}),
+//
+//		// output interface
+//		.hb_out(Hblank_Sd),
+//		.vb_out(Vblank_Sd),
+//		.hs_out(Hsync_Sd),
+//		.vs_out(Vsync_Sd),
+//		.r_out(R_Sd),
+//		.g_out(G_Sd),
+//		.b_out(B_Sd)
+//	);
+
+	scandoubler_2 #(.LENGTH(LINE_LENGTH), .HALF_DEPTH(0)) sd
 	(
-		// system interface
-		.clk_sys(i_clk),
-		.bypass(1'b0),
+		.clk_vid(i_clk),
+		.hq2x(hq2x),
 
-		// Pixelclock
-		.ce_divider(ce_divider), // 0 - clk_sys/4, 1 - clk_sys/2, 2 - clk_sys/3, 3 - clk_sys/4, etc.
-		//.ce_divider(cediv), // 0 - clk_sys/4, 1 - clk_sys/2, 2 - clk_sys/3, 3 - clk_sys/4, etc.
-		.pixel_ena(), //output
-		.scanlines(2'd2), // scanlines (00-none 01-25% 10-50% 11-75%)
-
-		// shifter video interface
+		.ce_pix(ce_pix),
+		.hs_in(Hsync),
+		.vs_in(Vsync),
 		.hb_in(Hblank),
 		.vb_in(Vblank),
-		.hs_in(Hsync),
-		//.hs_in(delayed_hsync[1]),
-		.vs_in(Vsync),
-		.r_in({R[7:2]&{6{BLANKn}}}),
-		.g_in({G[7:2]&{6{BLANKn}}}),
-		.b_in({B[7:2]&{6{BLANKn}}}),
+		.r_in({R[7:0]&{8{BLANKn}}}),
+		.g_in({G[7:0]&{8{BLANKn}}}),
+		.b_in({B[7:0]&{8{BLANKn}}}),
 
-		// output interface
-		.hb_out(Hblank_Sd),
-		.vb_out(Vblank_Sd),
+		.ce_pix_out(),
 		.hs_out(Hsync_Sd),
 		.vs_out(Vsync_Sd),
+		.hb_out(Hblank_Sd),
+		.vb_out(Vblank_Sd),
 		.r_out(R_Sd),
 		.g_out(G_Sd),
 		.b_out(B_Sd)
