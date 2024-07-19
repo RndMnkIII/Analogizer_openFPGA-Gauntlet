@@ -1,6 +1,7 @@
 # Pocket openFPGA Gauntlet Core with support for Analogizer-FPGA adapter
 * Analogizer V1.0.0 [12/06/2024]: Added initial support for Analogizer adapter (RGBS, RGsB, YPbPr, Y/C, SVGA Scandoubler) and SNAC.
 * Analogizer V1.0.1 [13/06/2024]: Added new scandoubler with HQ2x FX (taken from MiSTer framework). Fixed video image noise.
+* Analogizer V1.0.2 [19/07/2024]: Fixed SNAC PCEngine Multitap 4 Player not working, fixed support for the JAMMA TO SNAC DB15 adapter.
   
 Adapted to Analogizer by [@RndMnkIII](https://github.com/RndMnkIII) based on **obsidian-dot-dev** openFPGA Gauntlet Core:
 https://github.com/obsidian-dot-dev/openFPGA-Gauntlet
@@ -14,6 +15,8 @@ The core can output RGBS, RGsB, YPbPr, Y/C and SVGA scandoubler (50% scanlines) 
 | YPbPr        |  ✅    |
 | Y/C*         |  ✅    |
 | Scandoubler  |  ✅    |
+
+The Analogizer interface allow to mix game inputs from compatible SNAC gamepads supported by Analogizer (DB15 Neogeo, NES, SNES, PCEngine) with Analogue Pocket built-in controls or from Dock USB or wireless supported controllers (Analogue support).
 
 
 **Analogizer** is responsible for generating the correct encoded Y/C signals from RGB and outputs to R,G pins of VGA port. Also redirects the CSync to VGA HSync pin.

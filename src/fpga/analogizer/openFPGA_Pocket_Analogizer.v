@@ -74,6 +74,7 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000, parame
     input wire i_rst,
 	input wire i_ena,
 	//Video interface
+	input wire video_clk,
 	input wire [3:0] analog_video_type,
 	input wire [7:0] R,
 	input wire [7:0] G,
@@ -84,15 +85,9 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000, parame
 	input wire Hsync,
 	input wire Vsync,
 	input wire Csync,
-	input wire video_clk,
 	//Video Y/C Encoder interface
-	input wire PALFLAG,
-	//input wire CVBS,
-	input wire MULFLAG,
-	input wire [4:0] CHROMA_ADD,
-	input wire [4:0] CHROMA_MULT,
 	input wire [39:0] CHROMA_PHASE_INC,
-	input wire [26:0] COLORBURST_RANGE,
+	input wire PALFLAG,
 	//Video SVGA Scandoubler interface
 	input wire ce_pix,
 	input wire hq2x,
@@ -249,80 +244,17 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000, parame
 	yc_out yc_out
 	(
 		.clk(i_clk),
-		.PAL_EN(PALFLAG),
-		.CVBS(1'b0),
 		.PHASE_INC(CHROMA_PHASE_INC),
-		.COLORBURST_RANGE(COLORBURST_RANGE),
-		.MULFLAG(MULFLAG),
-		.CHRADD(CHROMA_ADD), //fine tune 0-31
-		.CHRMUL(CHROMA_MULT), //fine tune 0-31
+		.PAL_EN(PALFLAG),
 		.hsync(Hsync),
 		.vsync(Vsync),
 		.csync(Csync),
-		.dout(yc_o),
-		//.din(rgb_color_r),
     	.din({R&{8{BLANKn}},G&{8{BLANKn}},B&{8{BLANKn}}}),
+		.dout(yc_o),
 		.hsync_o(),
 		.vsync_o(),
 		.csync_o(yc_cs)
 	);
-
-
-	//delay hsync one pixel clock period
-	// reg [1:0] delayed_hsync = 0;
-	// reg pclk_r = 0;
-	// always @(posedge i_clk) begin
-	// 	pclk_r <= video_clk;
-	// 	if(!pclk_r && video_clk) begin
-	// 		delayed_hsync[0] <= Hsync;
-	// 		delayed_hsync[1] <= delayed_hsync[0];
-	// 	end
-	// end
-	// reg [2:0] cediv;
-	// always @(posedge i_clk) begin
-	// 	case (p1_btn_state[9:4]) 
-	// 	  6'b000000: cediv <= 3'd1;
-	// 	  6'b000001: cediv <= 3'd2;
-	// 	  6'b000010: cediv <= 3'd3;
-	// 	  6'b000100: cediv <= 3'd4;
-	//       6'b001000: cediv <= 3'd5;
-	// 	  6'b010000: cediv <= 3'd6;
-	//       6'b100000: cediv <= 3'd7;
-
-	// 	endcase
-	// end
-
-//	scandoubler sc_video
-//	(
-//		// system interface
-//		.clk_sys(i_clk),
-//		.bypass(1'b0),
-//
-//		// Pixelclock
-//		.ce_divider(ce_divider), // 0 - clk_sys/4, 1 - clk_sys/2, 2 - clk_sys/3, 3 - clk_sys/4, etc.
-//		//.ce_divider(cediv), // 0 - clk_sys/4, 1 - clk_sys/2, 2 - clk_sys/3, 3 - clk_sys/4, etc.
-//		.pixel_ena(), //output
-//		.scanlines(2'd2), // scanlines (00-none 01-25% 10-50% 11-75%)
-//
-//		// shifter video interface
-//		.hb_in(Hblank),
-//		.vb_in(Vblank),
-//		.hs_in(Hsync),
-//		//.hs_in(delayed_hsync[1]),
-//		.vs_in(Vsync),
-//		.r_in({R[7:2]&{6{BLANKn}}}),
-//		.g_in({G[7:2]&{6{BLANKn}}}),
-//		.b_in({B[7:2]&{6{BLANKn}}}),
-//
-//		// output interface
-//		.hb_out(Hblank_Sd),
-//		.vb_out(Vblank_Sd),
-//		.hs_out(Hsync_Sd),
-//		.vs_out(Vsync_Sd),
-//		.r_out(R_Sd),
-//		.g_out(G_Sd),
-//		.b_out(B_Sd)
-//	);
 
 	scandoubler_2 #(.LENGTH(LINE_LENGTH), .HALF_DEPTH(0)) sd
 	(
@@ -363,8 +295,8 @@ module openFPGA_Pocket_Analogizer #(parameter MASTER_CLK_FREQ=50_000_000, parame
 	assign cart_tran_bank1         = i_rst | ~i_ena ? 8'hzz : {CART_BK1_OUT_P76,video_clk,Bout[5:1]};      //on reset state set ouput value to 8'hZ
 	assign cart_tran_bank1_dir     = i_rst | ~i_ena ? 1'b0  : 1'b1;                                     //on reset state set pin dir to input
 	//PIN30
-	assign cart_tran_pin30         = i_rst | ~i_ena ? 1'b0 : ((CART_PIN30_DIR) ? CART_PIN30_OUT : 1'bZ); //on reset state set ouput value to 4'hf
-	assign cart_tran_pin30_dir     = i_rst | ~i_ena ? 1'bz : CART_PIN30_DIR;                              //on reset state set pin dir to output
+	assign cart_tran_pin30         = i_rst | ~i_ena ? 1'bz : ((CART_PIN30_DIR) ? CART_PIN30_OUT : 1'bZ); //on reset state set ouput value to 4'hf
+	assign cart_tran_pin30_dir     = i_rst | ~i_ena ? 1'b0 : CART_PIN30_DIR;                              //on reset state set pin dir to output
 	assign CART_PIN30_IN           = cart_tran_pin30;
 	assign cart_pin30_pwroff_reset = i_rst | ~i_ena ? 1'b0 : 1'b1;                                      //1'b1 (GPIO USE)
 	//PIN31

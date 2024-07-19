@@ -600,48 +600,17 @@ wire ANALOGIZER_DE = ~(~vblank_core || ~hblank_core);
 
 // SET PAL and NTSC TIMING and pass through status bits. ** YC must be enabled in the qsf file **
 wire [39:0] CHROMA_PHASE_INC;
-wire [26:0] COLORBURST_RANGE;
-wire [4:0] CHROMA_ADD;
-wire [4:0] CHROMA_MULT;
-wire YC_EN;
 wire PALFLAG;
 
-	parameter NTSC_REF = 3.579545;   
-	parameter PAL_REF = 4.43361875;
-	// Colorburst Lenth Calculation to send to Y/C Module, based on the CLK_VIDEO of the core
-	localparam [6:0] COLORBURST_START = (3.7 * (CLK_VIDEO_NTSC/NTSC_REF));
-	localparam [9:0] COLORBURST_NTSC_END = (9 * (CLK_VIDEO_NTSC/NTSC_REF)) + COLORBURST_START;
-	localparam [9:0] COLORBURST_PAL_END = (10 * (CLK_VIDEO_PAL/PAL_REF)) + COLORBURST_START;
- 
-	// Parameters to be modifed
-    parameter CLK_VIDEO_NTSC = 57.27272; // Must be filled E.g XX.X Hz - CLK_VIDEO
-	parameter CLK_VIDEO_PAL =  57.27272; // Must be filled E.g XX.X Hz - CLK_VIDEO
-    // parameter CLK_VIDEO_NTSC = 28.63636; // Must be filled E.g XX.X Hz - CLK_VIDEO
-	// parameter CLK_VIDEO_PAL =  28.63636; // Must be filled E.g XX.X Hz - CLK_VIDEO
+// adjusted for 93_068_170 video clock
+localparam [39:0] NTSC_PHASE_INC = 40'd42288908760; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
+localparam [39:0] PAL_PHASE_INC  = 40'd52378975204; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
 
-    // adjusted for 57_272_720 video clock
-	// localparam [39:0] NTSC_PHASE_INC = 40'd68719476736; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
-	// localparam [39:0] PAL_PHASE_INC  = 40'd85115834707; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
-
-    //adjusted for 28.63636MHz video clock
-    // localparam [39:0] NTSC_PHASE_INC = 40'd137438953472; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
-	// localparam [39:0] PAL_PHASE_INC  = 40'd170231669414; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
-
-   // adjusted for 93_068_170 video clock
-	localparam [39:0] NTSC_PHASE_INC = 40'd42288908760; // ((NTSC_REF * 2^40) / CLK_VIDEO_NTSC)
-	localparam [39:0] PAL_PHASE_INC  = 40'd52378975204; // ((PAL_REF * 2^40) / CLK_VIDEO_PAL)
-
-    //42.288.908.760
-    //52.378.975.204
-	// Send Parameters to Y/C Module
-	assign CHROMA_PHASE_INC = (analogizer_video_type == 4'h4) || (analogizer_video_type == 4'hC) ? PAL_PHASE_INC : NTSC_PHASE_INC; 
-	assign PALFLAG = (analogizer_video_type == 4'h4) || (analogizer_video_type == 4'hC); 
-    assign CHROMA_ADD = 5'd0; //yc_chroma_add_s;
-    assign CHROMA_MULT = 5'd0; //yc_chroma_mult_s;
- 	assign COLORBURST_RANGE = {COLORBURST_START, COLORBURST_NTSC_END, COLORBURST_PAL_END}; // Pass colorburst length
-
-
-
+//42.288.908.760
+//52.378.975.204
+// Send Parameters to Y/C Module
+assign CHROMA_PHASE_INC = (analogizer_video_type == 4'h4) || (analogizer_video_type == 4'hC) ? PAL_PHASE_INC : NTSC_PHASE_INC; 
+assign PALFLAG = (analogizer_video_type == 4'h4) || (analogizer_video_type == 4'hC); 
 
 synch_3 #(.WIDTH(30)) sync_video({ {r_conv,4'h0},{g_conv,4'h0},{b_conv,4'h0},~hs_core,~vs_core,SYNC,~hblank_core,~vblank_core,ANALOGIZER_DE}, {color_s,sync_s,blank_s}, clk_sys);
 wire [23:0] color_s; //RGB24
@@ -658,6 +627,7 @@ openFPGA_Pocket_Analogizer #(.MASTER_CLK_FREQ(93_068_170), .LINE_LENGTH(320)) an
 	.i_rst((~reset_n || manual_reset)), //i_rst is active high
 	.i_ena(1'b1),
 	//Video interface
+    .video_clk(clk_sys),
 	.analog_video_type(analogizer_video_type),
     .R(color_s[23:16]),
 	.G(color_s[15:8] ),
@@ -668,23 +638,9 @@ openFPGA_Pocket_Analogizer #(.MASTER_CLK_FREQ(93_068_170), .LINE_LENGTH(320)) an
     .Hsync(sync_s[2]),
 	.Vsync(sync_s[1]),
     .Csync(sync_s[0]), //composite SYNC on HSync.
-    // .R({r_conv,4'h0}),
-	// .G({g_conv,4'h0}),
-	// .B({b_conv,4'h0}),
-    // .Hblank(~hblank_core),
-    // .Vblank(~vblank_core),
-    // .BLANKn(ANALOGIZER_DE),
-    // .Hsync(~hs_core),
-	// .Vsync(~vs_core),
-    // .Csync(SYNC), //composite SYNC on HSync.
-    .video_clk(clk_sys),
     //Video Y/C Encoder interface
-    .PALFLAG(PALFLAG),
-    .MULFLAG(1'b0),
-    .CHROMA_ADD(CHROMA_ADD),
-    .CHROMA_MULT(CHROMA_MULT),
     .CHROMA_PHASE_INC(CHROMA_PHASE_INC),
-    .COLORBURST_RANGE(COLORBURST_RANGE),
+    .PALFLAG(PALFLAG),
     //Video SVGA Scandoubler interface
     .ce_pix(clk7vid_s),
     .hq2x(sd_hq2x_s),
@@ -1464,7 +1420,7 @@ assign clk_sys = clk_93;
 
 
 //[ANALOGIZER HOOK START]
-wire clk_core_57;
+//wire clk_core_57;
 wire clk_core_28;
 
 mf_pllbase mp1 (
@@ -1477,12 +1433,12 @@ mf_pllbase mp1 (
     .outclk_4       ( dram_clk          ),
     .locked         ( pll_core_locked )
 );
-pll_video mp2 (
-    .refclk         ( clk_74a          ),
-    .rst            ( 0                ),
-	.outclk_0       ( clk_core_57     ),
-    .locked         ( pll_video_locked )
-);
+// pll_video mp2 (
+//     .refclk         ( clk_74a          ),
+//     .rst            ( 0                ),
+// 	.outclk_0       ( clk_core_57     ),
+//     .locked         ( pll_video_locked )
+// );
 
 //[ANALOGIZER HOOK END]
 endmodule
